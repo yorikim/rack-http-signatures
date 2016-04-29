@@ -1,4 +1,4 @@
-require "rack/http/signatures/version"
+require 'rack/http/signatures/version'
 
 module Rack
   module Http
