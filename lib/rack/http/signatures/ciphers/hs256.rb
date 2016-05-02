@@ -1,3 +1,5 @@
+require 'openssl'
+
 module Rack::Http::Signatures::Ciphers
   module HS256
     class << self
