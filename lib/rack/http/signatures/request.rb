@@ -17,21 +17,29 @@ module Rack::Http::Signatures
 
     def valid?
       return false unless signature?
-      data = (parameters['headers'] || 'date').split(' ').map { |header| "#{header}: #{@env["HTTP_#{header.upcase}"]}" }.join("\n")
 
       Verifier.verify(
           parameters['algorithm'],
           KeyManager.get_key_from_keyid(key_id),
           parameters['signature'],
-          data
+          get_data(parameters['headers'])
       )
-    rescue Errors::UnknownAlgorithmError
+    rescue Errors::UnknownAlgorithmError, TypeError
       false
     end
 
     def signature?
       return false if (@env.keys & AUTHORIZATION_KEYS).empty?
       'signature' == scheme
+    end
+
+    private
+
+    def get_data(headers)
+      (headers || 'date').split(' ').map do |header|
+        return "#{header}: #{@env['REQUEST_METHOD'].downcase} #{@env['REQUEST_PATH']}" if header == '(request-target)'
+        "#{header}: #{@env["HTTP_#{header.upcase}"]}"
+      end.join("\n")
     end
   end
 end

@@ -6,7 +6,7 @@ describe Rack::Http::Signatures::VerifySignature do
 
   subject do
     described_class.new(app) do |config|
-      config.get_key_from_keyid { |key_id| File.read('spec/support/fixtures/public.pem') }
+      config.get_key_from_keyid { |key_id| File.read('spec/support/fixtures/public.pem') if key_id == 'Test' }
     end
   end
 
@@ -25,7 +25,7 @@ describe Rack::Http::Signatures::VerifySignature do
       end
 
       it 'returns 401 code' do
-        response = request.get('/', 'HTTP_DATE' => 'Thu, 05 Jan 2014 21:31:40 GMT', 'HTTP_AUTHORIZATION' => 'Signature keyId="Test",algorithm="rsa-sha256",headers="date",signature=""')
+        response = request.get('/', 'HTTP_DATE' => 'Thu, 05 Jan 2014 21:31:40 GMT', 'HTTP_AUTHORIZATION' => 'Signature keyId="Test1",algorithm="rsa-sha256",headers="date",signature=""')
         expect(response.status).to eq(401)
       end
     end
