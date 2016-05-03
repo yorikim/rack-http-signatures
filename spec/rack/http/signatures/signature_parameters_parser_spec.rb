@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Rack::Http::Signatures::SignatureParametersParser do
-  let(:key) { instance_double('HttpSignatures::Key', id: 'pda') }
+  let(:public_key) { instance_double('HttpSignatures::Key', id: 'pda') }
   let(:algorithm) { instance_double('HttpSignatures::Algorithm::Hmac', name: 'hmac-test') }
   let(:header_list) { instance_double('HttpSignatures::HeaderList', to_str: 'a b c') }
   let(:signature) { instance_double('HttpSignatures::Signature', to_str: 'sigstring') }

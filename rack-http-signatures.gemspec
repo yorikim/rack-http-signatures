@@ -21,7 +21,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'bundler', '~> 1.12'
   s.add_development_dependency 'rake', '~> 10.0'
   s.add_development_dependency 'rspec', '~> 3.0'
-  s.add_development_dependency 'rack'
-  s.add_development_dependency 'http_signatures'
-  s.add_development_dependency 'warden'
+  s.add_runtime_dependency 'rack'
 end

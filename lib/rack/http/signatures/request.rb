@@ -19,8 +19,8 @@ module Rack::Http::Signatures
       return false unless signature?
 
       Verifier.verify(
-          parameters['algorithm'],
-          KeyManager.get_key_from_keyid(key_id),
+          algorithm,
+          public_key,
           parameters['signature'],
           get_data(parameters['headers'])
       )
@@ -34,6 +34,16 @@ module Rack::Http::Signatures
     end
 
     private
+
+    def public_key
+      @key ||= KeyManager.send "public_#{algorithm.gsub('-', '_')}_key_from_keyid", key_id
+    rescue NoMethodError
+      nil
+    end
+
+    def algorithm
+      parameters['algorithm']
+    end
 
     def get_data(headers)
       (headers || 'date').split(' ').map do |header|

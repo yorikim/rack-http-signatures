@@ -5,9 +5,9 @@ describe Rack::Http::Signatures::Config do
       block_is.run
     }
 
-    expect(Rack::Http::Signatures::KeyManager).to receive(:send).with(:define_singleton_method, :get_key_from_keyid).and_yield
+    expect(Rack::Http::Signatures::KeyManager).to receive(:send).with(:define_singleton_method, :public_rsa_sha256_key_from_keyid).and_yield
     expect(block_is).to receive(:run)
 
-    subject.get_key_from_keyid &block
+    subject.public_rsa_sha256_key_from_keyid &block
   end
 end
