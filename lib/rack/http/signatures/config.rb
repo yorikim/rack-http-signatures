@@ -2,7 +2,7 @@ require 'rack/http/signatures/key_manager'
 
 module Rack::Http::Signatures
   class Config < Hash
-    ALGORITHMS = %w(rsa_sha256 hmac_sha256 ecdsa_sha256)
+    ALGORITHMS = %w(rsa_sha256 hmac_sha256)
 
     def method_missing(method, *args, &block)
       match_data = /public_(.*)_key_from_keyid/.match(method)

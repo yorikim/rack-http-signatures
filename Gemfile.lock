@@ -2,12 +2,12 @@ PATH
   remote: .
   specs:
     rack-http-signatures (0.1.0)
+      rack
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.2.5)
-    http_signatures (1.0.4)
     rack (1.6.4)
     rake (10.5.0)
     rspec (3.4.0)
@@ -23,20 +23,16 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.4.0)
     rspec-support (3.4.1)
-    warden (1.2.6)
-      rack (>= 1.0)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
   bundler (~> 1.12)
-  http_signatures
-  rack
   rack-http-signatures!
   rake (~> 10.0)
   rspec (~> 3.0)
-  warden
 
 BUNDLED WITH
-   1.12.0
+   1.12.1
