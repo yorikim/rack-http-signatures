@@ -9,6 +9,8 @@
 /test/tmp/
 /test/version_tmp/
 /tmp/
+/config.ru
+/install_gem
 
 ## Specific to RubyMotion:
 .dat*
