@@ -3,8 +3,10 @@ require 'openssl'
 module Rack::Http::Signatures::Ciphers
   module HS256
     class << self
+      DIGEST = OpenSSL::Digest::SHA256.new
+
       def verify(key, signature, data)
-        OpenSSL::HMAC.digest(OpenSSL::Digest.new('sha256'), key, data) == signature
+        OpenSSL::HMAC.hexdigest(DIGEST, key, data) == signature
       end
     end
   end
