@@ -10,4 +10,13 @@ describe Rack::Http::Signatures::Config do
 
     subject.public_rsa_sha256_key_from_keyid &block
   end
+
+  it 'not defines signleton method for Unknown algorithm' do
+    block_is = double('block')
+    block = -> {
+      block_is.run
+    }
+
+    expect { subject.public_unknown_algorithm_key_from_keyid &block }.to raise_error NoMethodError
+  end
 end

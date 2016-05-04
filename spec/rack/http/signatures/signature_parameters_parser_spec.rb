@@ -15,7 +15,7 @@ describe Rack::Http::Signatures::SignatureParametersParser do
 
     it 'raise error' do
       header = 'keyId="pda",algorithm="hmac-test",headers="a b c",signature="c2lnc3RyaW5n",someField="12345678"'
-      expect { subject.parse(header) }.to raise_error(Rack::Http::Signatures::Errors::SignatureParametersParserError, 'unparseable segment: someField="12345678"')
+      expect { subject.parse(header) }.to raise_error(described_class::SignatureParametersParserError, 'unparseable segment: someField="12345678"')
     end
   end
 end

@@ -15,9 +15,16 @@ describe Rack::Http::Signatures::VerifySignature do
     let(:http_headers) { {'HTTP_DATE' => 'Thu, 05 Jan 2014 21:31:40 GMT'} }
     let(:request) { Rack::MockRequest.new(subject) }
 
-    it 'returns 401 when set unknown algorithm' do
+    it 'returns 400 when set unknown algorithm' do
       response = request.get('/', http_headers.merge('HTTP_AUTHORIZATION' => 'Signature keyId="Test",algorithm="Unknown-algorithm",headers="date",signature="some signature"'))
-      expect(response.status).to eq(401)
+      expect(response.status).to eq(400)
+      expect(response.body).to eq('algorithm not supported')
+    end
+
+    it 'returns 400 when set unknown field' do
+      response = request.get('/', http_headers.merge('HTTP_AUTHORIZATION' => 'Signature field="asdf",keyId="Test",algorithm="Unknown-algorithm",headers="date",signature="some signature"'))
+      expect(response.status).to eq(400)
+      expect(response.body).to eq('invalid parameters')
     end
 
     {:'rsa-sha256' => 'jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=',
@@ -33,6 +40,7 @@ describe Rack::Http::Signatures::VerifySignature do
           it 'returns 401 code when keyId is invalid' do
             response = request.get('/', http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test1\",algorithm=\"#{algorithm}\",headers=\"date\",signature=\"\""))
             expect(response.status).to eq(401)
+            expect(response.body).to eq('public key not found')
           end
         end
 
@@ -45,6 +53,7 @@ describe Rack::Http::Signatures::VerifySignature do
           it 'returns 401 code when signature is invalid' do
             response = request.get('/', http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"#{algorithm}\",signature=\"\""))
             expect(response.status).to eq(401)
+            expect(response.body).to eq('signing failed')
           end
         end
       end
