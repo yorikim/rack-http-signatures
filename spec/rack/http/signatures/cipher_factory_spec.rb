@@ -10,6 +10,6 @@ describe Rack::Http::Signatures::CipherFactory do
   end
 
   it 'raises UnknownAlgorithmError' do
-    expect { described_class.create('unknown-algorithm') }.to raise_error(Rack::Http::Signatures::Errors::UnknownAlgorithmError, 'Unknown algorithm')
+    expect { described_class.create('unknown-algorithm') }.to raise_error(described_class::UnknownAlgorithmError, 'Unknown algorithm')
   end
 end
