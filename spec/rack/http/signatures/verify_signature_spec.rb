@@ -15,6 +15,12 @@ describe Rack::Http::Signatures::VerifySignature do
     let(:http_headers) { {'HTTP_DATE' => 'Thu, 05 Jan 2014 21:31:40 GMT'} }
     let(:request) { Rack::MockRequest.new(subject) }
 
+    it 'returns 400 when request without authorization header' do
+      response = request.get('/', http_headers)
+      expect(response.status).to eq(400)
+      expect(response.body).to eq('authorization header not found')
+    end
+
     it 'returns 400 when set unknown algorithm' do
       response = request.get('/', http_headers.merge('HTTP_AUTHORIZATION' => 'Signature keyId="Test",algorithm="Unknown-algorithm",headers="date",signature="some signature"'))
       expect(response.status).to eq(400)
