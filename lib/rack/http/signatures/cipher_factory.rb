@@ -1,15 +1,18 @@
 require 'rack/http/signatures/ciphers/rsa256'
 require 'rack/http/signatures/ciphers/hs256'
-require 'rack/http/signatures/errors/unknown_algorithm_error'
 
 module Rack::Http::Signatures
   class CipherFactory
+    UnknownAlgorithmError = Class.new(ArgumentError)
+
+    VALID_ALGORITHMS = %w(rsa-sha256 hmac-sha256)
+
     class << self
       def create(algorithm)
         case algorithm
           when 'rsa-sha256'   then Ciphers::RSA256
           when 'hmac-sha256'  then Ciphers::HS256
-          else raise Errors::UnknownAlgorithmError, 'Unknown algorithm'
+          else raise UnknownAlgorithmError, 'Unknown algorithm'
         end
       end
     end

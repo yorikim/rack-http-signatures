@@ -1,6 +1,6 @@
-require 'rack/http/signatures/signature_parameters_parser'
 require 'rack/http/signatures/request'
 require 'rack/http/signatures/config'
+require 'rack/http/signatures/request_validator'
 
 module Rack::Http::Signatures
   class VerifySignature
@@ -10,20 +10,32 @@ module Rack::Http::Signatures
     end
 
     def call(env)
-      @request = Request.new(env)
-      return unauthorized unless @request.valid?
+      RequestValidator.validate_request(Request.new(env))
 
       @app.call(env)
+    rescue RequestValidator::BadRequestError => e
+      bad_request(e.message)
+    rescue RequestValidator::UnauthorizedError => e
+      unauthorized(e.message)
     end
 
     private
 
-    def unauthorized
+    def bad_request(message)
+      [400,
+       {'Content-Type' => 'text/plain',
+        'Content-Length' => "#{message.size}",
+       },
+       [message]
+      ]
+    end
+
+    def unauthorized(message)
       [401,
        {'Content-Type' => 'text/plain',
-        'Content-Length' => '0',
+        'Content-Length' => "#{message.size}",
         'WWW-Authenticate' => challenge},
-       []
+       [message]
       ]
     end
 

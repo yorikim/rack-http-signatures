@@ -1,7 +1,7 @@
-require 'rack/http/signatures/errors/signature_parameters_parser_error'
-
 module Rack::Http::Signatures
   module SignatureParametersParser
+    SignatureParametersParserError = Class.new(StandardError)
+
     class << self
       def parse(string)
         Hash[array_of_pairs(string)]
@@ -19,7 +19,7 @@ module Rack::Http::Signatures
 
       def pair(segment)
         match = segment_pattern.match(segment)
-        raise Errors::SignatureParametersParserError, "unparseable segment: #{segment}" if match.nil?
+        raise SignatureParametersParserError, "unparseable segment: #{segment}" if match.nil?
         match.captures
       end
 
