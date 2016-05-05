@@ -7,23 +7,29 @@ Middleware implementing draft 5 of the Signing HTTP Messages specification
 
 You don't need this source code unless you want to modify the gem. If you just want to use the library in your application, you should run:
 
-`gem install rack-http-signatures`
+```bash
+gem install rack-http-signatures
+```
 
 Or add gem to your Gemfile:
 
-`gem 'rack-http-signatures'`
+```ruby
+gem 'rack-http-signatures'
+```
 
 If you want to build the gem from source:
 
-`gem build rack-http-signatures.gemspec`
+```bash
+gem build rack-http-signatures.gemspec
+```
 
 ### Rails
 Add middleware to your application.rb:
 ```ruby
 config.middleware.use Rack::Http::Signatures::VerifySignature do |config|
-      config.public_rsa_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).public_rsa256_key }
-      config.public_hmac_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).hs256_key }
-    end
+  config.public_rsa_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).public_rsa256_key }
+  config.public_hmac_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).hs256_key }
+end
 ```
 
 Sample project: https://github.com/yorikim/rails_rack_http_signatures
