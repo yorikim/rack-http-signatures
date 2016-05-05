@@ -5,6 +5,7 @@ module Rack::Http::Signatures
 
     class << self
       def validate_request(request)
+        raise BadRequestError, 'authorization header not found' unless request.provided?
         raise BadRequestError, 'invalid parameters' unless request.valid_parameters?
         raise BadRequestError, 'algorithm not supported' unless request.valid_algorithm?
         raise UnauthorizedError, 'public key not found' unless request.public_key
