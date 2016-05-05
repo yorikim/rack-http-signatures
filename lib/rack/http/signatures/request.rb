@@ -31,9 +31,49 @@ module Rack::Http::Signatures
 
     def signed_data
       @signed_data ||= (parameters['headers'] || 'date').split(' ').map do |header|
-        return "#{header}: #{@env['REQUEST_METHOD'].downcase} #{@env['REQUEST_PATH']}" if header == '(request-target)'
-        "#{header}: #{@env["HTTP_#{header.upcase}"]}"
+        case header
+          when '(request-target)' then
+            "#{header}: #{method.downcase} #{relative_path}"
+          when 'host' then
+            "#{header}: #{host}"
+          when 'content-length' then
+            "#{header}: #{content_length}"
+          else
+            "#{header}: #{@env["HTTP_#{header.gsub('-', '_').upcase}"]}"
+        end
       end.join("\n")
+    end
+
+    def body
+      @env['rack.input']
+    end
+
+    def query_string
+      @env['QUERY_STRING']
+    end
+
+    def script_name
+      @env['SCRIPT_NAME']
+    end
+
+    def path_info
+      @env['PATH_INFO']
+    end
+
+    def relative_path
+      query_string.empty? ? path_info : "#{path_info}?#{query_string}"
+    end
+
+    def host
+      @env['SERVER_NAME']
+    end
+
+    def content_length
+      @env['CONTENT_LENGTH']
+    end
+
+    def method
+      @env['REQUEST_METHOD']
     end
 
     def valid_parameters?
