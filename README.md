@@ -87,7 +87,7 @@ openssl sha -sha256 -sign private.pem < data.txt | base64
 
 ### HMAC SHA256
 ```
-echo -n 'date: Thu, 05 Jan 2014 21:31:40 GMT' | openssl sha256 -hmac 'some secret key' | sed 's/^.* //' | base64
+echo -n 'date: Thu, 05 Jan 2014 21:31:40 GMT' | openssl sha256 -hmac 'some secret key' | sed 's/^.* //' | tr -d '\n' | base64
 ```
 
 

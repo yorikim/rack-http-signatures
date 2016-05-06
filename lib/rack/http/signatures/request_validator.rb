@@ -8,6 +8,7 @@ module Rack::Http::Signatures
         raise BadRequestError, 'authorization header not found' unless request.provided?
         raise BadRequestError, 'invalid parameters' unless request.valid_parameters?
         raise BadRequestError, 'algorithm not supported' unless request.valid_algorithm?
+        raise BadRequestError, 'digest header is not valid' unless request.valid_digest?
         raise UnauthorizedError, 'public key not found' unless request.public_key
         raise UnauthorizedError, 'signing failed' unless valid_signature?(request)
       end
