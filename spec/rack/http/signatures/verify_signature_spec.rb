@@ -40,23 +40,25 @@ describe Rack::Http::Signatures::VerifySignature do
     end
 
     context 'check digest header' do
+      let(:valid_http_signature) { http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\"") }
+
       it 'returns 400 when signature is invalid' do
         http_headers['HTTP_DIGEST'] = 'SHA-256=INVALID='
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(400)
         expect(response.body).to eq('digest header is not valid')
       end
 
       it 'returns 400 when algorithm is invalid' do
         http_headers['HTTP_DIGEST'] = 'SHA1=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE='
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(400)
         expect(response.body).to eq('digest header is not valid')
       end
 
       it 'returns 200 when digest header is empty' do
         http_headers.delete('HTTP_DIGEST')
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(200)
       end
     end
