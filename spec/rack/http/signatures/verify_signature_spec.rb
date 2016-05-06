@@ -39,6 +39,29 @@ describe Rack::Http::Signatures::VerifySignature do
       expect(response.body).to eq('invalid parameters')
     end
 
+    context 'check digest header' do
+      it 'returns 400 when signature is invalid' do
+        http_headers['HTTP_DIGEST'] = 'SHA-256=INVALID='
+        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        expect(response.status).to eq(400)
+        expect(response.body).to eq('digest header is not valid')
+      end
+
+      it 'returns 400 when algorithm is invalid' do
+        http_headers['HTTP_DIGEST'] = 'SHA1=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE='
+        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        expect(response.status).to eq(400)
+        expect(response.body).to eq('digest header is not valid')
+      end
+
+      it 'returns 200 when digest header is empty' do
+        http_headers.delete('HTTP_DIGEST')
+        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        expect(response.status).to eq(200)
+      end
+    end
+
+
     context 'default test (no headers)' do
       {:'rsa-sha256' => 'jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=',
        :'hmac-sha256' => 'NzU4ZDAyMGRmNzQxZmQ3NDQ0YWY0Mzk5Y2YxMjUzYzA1NGI2MWQ2OTc5NjhlYjM3NTg2Y2I1MmFiMDlkN2NkNA=='

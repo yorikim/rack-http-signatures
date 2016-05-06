@@ -1,7 +1,9 @@
 require 'rack/auth/abstract/request'
+require 'rack/http/signatures/digest_validator'
 require 'rack/http/signatures/key_manager'
 require 'rack/http/signatures/signature_parameters_parser'
 require 'base64'
+require 'openssl'
 
 module Rack::Http::Signatures
   class Request < Rack::Auth::AbstractRequest
@@ -45,7 +47,11 @@ module Rack::Http::Signatures
     end
 
     def body
-      @env['rack.input']
+      @env['rack.input'].read
+    end
+
+    def digest
+      @env['HTTP_DIGEST']
     end
 
     def query_string
@@ -82,6 +88,10 @@ module Rack::Http::Signatures
 
     def valid_algorithm?
       @valid_algorithm ||= CipherFactory::VALID_ALGORITHMS.include?(algorithm)
+    end
+
+    def valid_digest?
+      @valid_digest ||= (digest.nil? || DigestValidator.valid?(body, digest))
     end
 
     def signature?
