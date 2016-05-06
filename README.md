@@ -29,6 +29,24 @@ Add middleware to your application.rb:
 config.middleware.use Rack::Http::Signatures::VerifySignature do |config|
   config.public_rsa_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).public_rsa256_key }
   config.public_hmac_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).hs256_key }
+  config.bad_request do |message|
+    message = 'custom bad request error'
+    [400,
+     {'Content-Type' => 'text/plain',
+      'Content-Length' => "#{message.size}",
+     },
+     [message]
+    ]
+  end
+  config.unauthorized do |message|
+    message = 'custom unauthorized error'
+    [401,
+     {'Content-Type' => 'text/plain',
+      'Content-Length' => "#{message.size}",
+     },
+     [message]
+    ]
+  end
 end
 ```
 
@@ -44,6 +62,24 @@ class SampleHttpSignaturesApp < Sinatra::Base
   use Rack::Http::Signatures::VerifySignature do |config|
     config.public_rsa_sha256_key_from_keyid { |key_id| File.read('fixtures/rsa256/public.pem') if key_id == 'Test' }
     config.public_hmac_sha256_key_from_keyid { |key_id| File.read('fixtures/hs256/key.txt') if key_id == 'Test' }
+    config.bad_request do |message|
+      message = 'custom bad request error'
+      [400,
+       {'Content-Type' => 'text/plain',
+        'Content-Length' => "#{message.size}",
+       },
+       [message]
+      ]
+    end
+    config.unauthorized do |message|
+      message = 'custom unauthorized error'
+      [401,
+       {'Content-Type' => 'text/plain',
+        'Content-Length' => "#{message.size}",
+       },
+       [message]
+      ]
+    end
   end
 
   get '/' do
@@ -66,6 +102,24 @@ use Rack::Http::Signatures::VerifySignature do |config|
   end
   config.public_hmac_sha256_key_from_keyid do |key_id|
     File.read('spec/support/fixtures/hs256/key.txt') if key_id == 'Test'
+  end
+  config.bad_request do |message|
+    message = 'custom bad request error'
+    [400,
+     {'Content-Type' => 'text/plain',
+      'Content-Length' => "#{message.size}",
+     },
+     [message]
+    ]
+  end
+  config.unauthorized do |message|
+    message = 'custom unauthorized error'
+    [401,
+     {'Content-Type' => 'text/plain',
+      'Content-Length' => "#{message.size}",
+     },
+     [message]
+    ]
   end
 end
 
@@ -98,6 +152,11 @@ public_rsa_sha256_key_from_keyid
 public_hmac_sha256_key_from_keyid
 ```
 
+If you want customize error messages, you can redefine methods:
+```
+bad_request
+unauthorized
+```
 
 ## Supported algorithms
 * RSA SHA256
