@@ -11,6 +11,14 @@ module Rack::Http::Signatures
       end
     end
 
+    def bad_request(&block)
+      VerifySignature.send :define_method, :bad_request, &block
+    end
+
+    def unauthorized(&block)
+      VerifySignature.send :define_method, :unauthorized, &block
+    end
+
     private
 
     def algorithms

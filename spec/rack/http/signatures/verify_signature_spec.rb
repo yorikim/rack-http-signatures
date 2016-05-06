@@ -4,14 +4,14 @@ require 'rack/mock'
 describe Rack::Http::Signatures::VerifySignature do
   let(:app) { lambda { |env| [200, {'Content-Type' => 'text/plain'}, ['OK']] } }
 
-  subject do
-    described_class.new(app) do |config|
-      config.public_rsa_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/rsa256/public.pem') if key_id == 'Test' }
-      config.public_hmac_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/hs256/key.txt') if key_id == 'Test' }
-    end
-  end
-
   context 'with Authorization header' do
+    subject do
+      described_class.new(app) do |config|
+        config.public_rsa_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/rsa256/public.pem') if key_id == 'Test' }
+        config.public_hmac_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/hs256/key.txt') if key_id == 'Test' }
+      end
+    end
+
     let(:request) { Rack::MockRequest.new(subject) }
     let(:request_path) { 'http://example.com/foo?param=value&pet=dog' }
     let(:http_headers) { {
@@ -40,23 +40,25 @@ describe Rack::Http::Signatures::VerifySignature do
     end
 
     context 'check digest header' do
+      let(:valid_http_signature) { http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\"") }
+
       it 'returns 400 when signature is invalid' do
         http_headers['HTTP_DIGEST'] = 'SHA-256=INVALID='
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(400)
         expect(response.body).to eq('digest header is not valid')
       end
 
       it 'returns 400 when algorithm is invalid' do
         http_headers['HTTP_DIGEST'] = 'SHA1=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE='
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(400)
         expect(response.body).to eq('digest header is not valid')
       end
 
       it 'returns 200 when digest header is empty' do
         http_headers.delete('HTTP_DIGEST')
-        response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => "Signature keyId=\"Test\",algorithm=\"rsa-sha256\",signature=\"jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w=\""))
+        response = request.post(request_path, valid_http_signature)
         expect(response.status).to eq(200)
       end
     end
@@ -139,6 +141,52 @@ describe Rack::Http::Signatures::VerifySignature do
           end
         end
       end
+    end
+  end
+
+  context 'custom error messages' do
+    subject do
+      described_class.new(app) do |config|
+        config.public_rsa_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/rsa256/public.pem') if key_id == 'Test' }
+        config.bad_request do |message|
+          [400,
+           {'Content-Type' => 'text/plain',
+            'Content-Length' => "#{message.size}",
+           },
+           ['custom bad request error']
+          ]
+        end
+        config.unauthorized do |message|
+          [401,
+           {'Content-Type' => 'text/plain',
+            'Content-Length' => "#{message.size}",
+           },
+           ['custom unauthorized error']
+          ]
+        end
+      end
+    end
+
+    let(:request) { Rack::MockRequest.new(subject) }
+    let(:request_path) { 'http://example.com/foo?param=value&pet=dog' }
+    let(:http_headers) { {
+        input: '{"hello": "world"}',
+        'HTTP_DATE' => 'Thu, 05 Jan 2014 21:31:40 GMT',
+        'HTTP_CONTENT_TYPE' => 'application/json',
+        'HTTP_DIGEST' => 'SHA-256=X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=',
+    } }
+
+
+    it 'returns custom bad request error' do
+      response = request.post(request_path, http_headers)
+      expect(response.status).to eq(400)
+      expect(response.body).to eq('custom bad request error')
+    end
+
+    it 'returns custom unauthorized error' do
+      response = request.post(request_path, http_headers.merge('HTTP_AUTHORIZATION' => 'Signature keyId="Test",algorithm="rsa-sha256",signature="asdfasdfa"'))
+      expect(response.status).to eq(401)
+      expect(response.body).to eq('custom unauthorized error')
     end
   end
 end
