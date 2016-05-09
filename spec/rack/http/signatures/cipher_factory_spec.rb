@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe Rack::Http::Signatures::CipherFactory do
-  {'rsa-sha256' => Rack::Http::Signatures::Ciphers::RSA256,
-   'hmac-sha256' => Rack::Http::Signatures::Ciphers::HS256,
+  { 'rsa-sha256'  => Rack::Http::Signatures::Ciphers::RSA256,
+    'hmac-sha256' => Rack::Http::Signatures::Ciphers::HS256
   }.each do |algorithm, klass|
     it "returns #{algorithm}" do
       expect(described_class.create(algorithm)).to eq(klass)
