@@ -2,7 +2,7 @@ AllCops:
   TargetRubyVersion: 1.9
   Exclude:
     - '**/config.ru'
-    - 'vendor/**'
+    - 'vendor/**/*'
 
 Style/Documentation:
   Enabled: false
