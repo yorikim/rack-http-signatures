@@ -1,0 +1,15 @@
+AllCops:
+  TargetRubyVersion: 1.9
+  Exclude:
+    - '**/config.ru'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 140
+  Exclude:
+    - '**/*_spec.rb'
+
+Metrics/CyclomaticComplexity:
+  Max: 10

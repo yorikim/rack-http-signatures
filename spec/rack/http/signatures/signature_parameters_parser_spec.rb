@@ -9,7 +9,7 @@ describe Rack::Http::Signatures::SignatureParametersParser do
   describe '#parse' do
     it 'parse string into hash' do
       header = 'keyId="pda",algorithm="hmac-test",headers="a b c",signature="c2lnc3RyaW5n"'
-      hash = {'keyId' => 'pda', 'algorithm' => 'hmac-test', 'headers' => 'a b c', 'signature' => 'c2lnc3RyaW5n'}
+      hash   = { 'keyId' => 'pda', 'algorithm' => 'hmac-test', 'headers' => 'a b c', 'signature' => 'c2lnc3RyaW5n' }
       expect(subject.parse(header)).to eq(hash)
     end
 
