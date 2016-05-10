@@ -27,6 +27,8 @@ gem build rack-http-signatures.gemspec
 Add middleware to your application.rb:
 ```ruby
 config.middleware.use Rack::Http::Signatures::VerifySignature do |config|
+  config.authorization_header 'authorization'
+  config.digest_header 'digest'
   config.public_rsa_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).public_rsa256_key }
   config.public_hmac_sha256_key_from_keyid { |key_id| User.find_by(email: key_id).hs256_key }
   config.bad_request do |message|
@@ -60,6 +62,8 @@ require 'rack/http/signatures'
 
 class SampleHttpSignaturesApp < Sinatra::Base
   use Rack::Http::Signatures::VerifySignature do |config|
+    config.authorization_header 'authorization'
+    config.digest_header 'digest'
     config.public_rsa_sha256_key_from_keyid { |key_id| File.read('fixtures/rsa256/public.pem') if key_id == 'Test' }
     config.public_hmac_sha256_key_from_keyid { |key_id| File.read('fixtures/hs256/key.txt') if key_id == 'Test' }
     config.bad_request do |message|
@@ -97,6 +101,8 @@ Add middleware to your config.ru file:
 require 'rack/http/signatures'
 
 use Rack::Http::Signatures::VerifySignature do |config|
+  config.authorization_header 'authorization'
+  config.digest_header 'digest'
   config.public_rsa_sha256_key_from_keyid do |key_id|
     File.read('spec/support/fixtures/rsa256/public.pem') if key_id == 'Test'
   end
@@ -156,6 +162,12 @@ If you want customize error messages, you can redefine methods:
 ```
 bad_request
 unauthorized
+```
+
+Also, you can customize headers names for digest and signature:
+```
+authorization_header
+digest_header
 ```
 
 ## Supported algorithms

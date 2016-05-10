@@ -7,6 +7,8 @@ describe Rack::Http::Signatures::VerifySignature do
   context 'with Authorization header' do
     subject do
       described_class.new(app) do |config|
+        config.authorization_header 'authorization'
+        config.digest_header 'digest'
         config.public_rsa_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/rsa256/public.pem') if key_id == 'Test' }
         config.public_hmac_sha256_key_from_keyid { |key_id| File.read('spec/support/fixtures/hs256/key.txt') if key_id == 'Test' }
       end
