@@ -1,5 +1,6 @@
 require 'rack/auth/abstract/request'
 require 'rack/http/signatures/digest_validator'
+require 'rack/http/signatures/header_manager'
 require 'rack/http/signatures/key_manager'
 require 'rack/http/signatures/signature_parameters_parser'
 require 'base64'
@@ -91,6 +92,8 @@ module Rack
         end
 
         private
+
+        AUTHORIZATION_KEYS = ["HTTP_#{HeaderManager.authorization_header.upcase}"]
 
         def signed_header(header)
           case header

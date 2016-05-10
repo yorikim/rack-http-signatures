@@ -13,6 +13,14 @@ module Rack
           end
         end
 
+        def authorization_header(header)
+          HeaderManager.send :define_method, :authorization_header, -> { header }
+        end
+
+        def digest_header(header)
+          HeaderManager.send :define_method, :digest_header, -> { header }
+        end
+
         def bad_request(&block)
           VerifySignature.send :define_method, :bad_request, &block
         end
